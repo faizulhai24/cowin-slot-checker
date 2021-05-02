@@ -3,6 +3,7 @@ djangorestframework
 psycopg2-binary
 django-cors-headers
 django-extensions
-django-redis
+redis
 celery[redis]
+requests
 

@@ -8,6 +8,7 @@ from cowin.common.cache.redis import redis
 from cowin.common.helpers.otp_generator import generate_otp
 from .models import User
 from .serializers import UserSerializer
+from .tasks import add_district_ids
 
 
 class UserViewSet(GenericViewSet, RetrieveModelMixin):
@@ -26,7 +27,7 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         otp = generate_otp()
-        redis.set(request.data['phone_number'], otp, 1000)
+        redis.set(request.data['phone_number'], otp, 300)
         return Response(serializer.data, status=HTTP_201_CREATED)
 
     @action(methods=['post'], url_path='otp/submit', detail=False)
@@ -42,10 +43,13 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin):
         if not otp_in_cache:
             return Response({'message': 'OTP has expired, please try again.'}, status=HTTP_404_NOT_FOUND)
 
-        if otp != int(otp_in_cache):
+        if str(otp) != otp_in_cache.decode("utf-8"):
             return Response({'message': 'Incorrect OTP, please try again.'}, status=HTTP_401_UNAUTHORIZED)
 
         instance = self.queryset.filter(phone_number=phone_number).get()
+
+        add_district_ids(instance.district_ids).delay()
+
         serializer = self.serializer_class(instance, data={'verified': True}, partial=True)
         serializer.is_valid()
         serializer.save()
