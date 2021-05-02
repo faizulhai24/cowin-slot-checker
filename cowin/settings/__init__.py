@@ -13,5 +13,5 @@ if not ENVIRONMENT:
             raise Exception('Environment not defined and local settings not found')
 else:
     importlib.import_module(
-        "skynet_v2.settings.{mname}".format(mname=ENVIRONMENT)
+        "cowin.settings.{mname}".format(mname=ENVIRONMENT)
     )
