@@ -1,0 +1,30 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Distribution / packaging
+bin/
+build/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+
+# pycharm
+.idea/
+
+.DS_Store
+env/
+
+local.py
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+celerybeat-schedule
