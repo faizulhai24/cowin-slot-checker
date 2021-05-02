@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework.decorators import action
 from rest_framework.mixins import RetrieveModelMixin
 from rest_framework.response import Response
@@ -9,6 +11,8 @@ from cowin.common.helpers.otp_generator import generate_otp
 from .models import User
 from .serializers import UserSerializer
 from .tasks import add_district_ids
+
+logger = logging.getLogger(__name__)
 
 
 class UserViewSet(GenericViewSet, RetrieveModelMixin):
@@ -23,10 +27,12 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin):
             return Response({'message': 'Message consent is required to register for notification.'},
                             status=HTTP_400_BAD_REQUEST)
 
+        logger.info(request.data)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         otp = generate_otp()
+        logger.info("Generated otp {}".format(otp))
         redis.set(request.data['phone_number'], otp, 300)
         return Response(serializer.data, status=HTTP_201_CREATED)
 
@@ -36,11 +42,13 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin):
         phone_number = request.data.get('phone_number')
 
         if not otp or not phone_number:
+            logger.error('OTP, Phone number is required')
             return Response({'message': 'OTP, Phone number is required.'}, status=HTTP_400_BAD_REQUEST)
 
         otp_in_cache = redis.get(phone_number)
 
         if not otp_in_cache:
+            logger.error('OTP has expired, please try again')
             return Response({'message': 'OTP has expired, please try again.'}, status=HTTP_404_NOT_FOUND)
 
         if str(otp) != otp_in_cache.decode("utf-8"):
