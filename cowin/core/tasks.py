@@ -3,6 +3,7 @@ import datetime
 from celery import shared_task
 from cowin.common.cache.redis import redis
 from cowin.common.helpers.slot_checker import SlotChecker
+from cowin.common.services.verloop_whatsapp_api import verloop_whatsapp_api
 
 logger = logging.getLogger(__name__)
 
@@ -57,5 +58,13 @@ def send_message_for_district(district_id, free_slots):
     #     'vaccine': session['vaccine'],
     #     'available_capacity': session['available_capacity']
     # }
+
+
+@shared_task(name='core.tasks.send_otp')
+def send_otp(phone_number, name, otp):
+    return verloop_whatsapp_api.send_otp(phone_number, {
+        'name': name,
+        'number': otp
+    })
 
 

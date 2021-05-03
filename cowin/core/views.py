@@ -10,7 +10,7 @@ from cowin.common.cache.redis import redis
 from cowin.common.helpers.otp_generator import generate_otp
 from .models import User
 from .serializers import UserSerializer
-from .tasks import add_district_ids_to_cache, add_user_to_district_cache
+from .tasks import add_district_ids_to_cache, add_user_to_district_cache, send_otp
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +24,7 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin):
     def create(self, request, *args, **kwargs):
         message_consent = request.data.get('message_consent')
         phone_number = request.data.get('phone_number')
+        name = request.data.get('first_name')
         if not message_consent:
             return Response({'message': 'Message consent is required to register for notification.'},
                             status=HTTP_400_BAD_REQUEST)
@@ -39,8 +40,8 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         otp = generate_otp()
-        logger.info("Generated otp {}".format(otp))
         redis.set(request.data['phone_number'], otp, 300)
+        send_otp.delay(phone_number, name, otp)
         return Response(serializer.data, status=HTTP_201_CREATED)
 
     @action(methods=['post'], url_path='otp/submit', detail=False)
