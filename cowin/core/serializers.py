@@ -12,4 +12,6 @@ class UserSerializer(serializers.ModelSerializer):
                   'state_id',
                   'district_ids',
                   'verified',
-                  'message_consent')
+                  'message_consent',
+                  'is_deleted'
+                )
