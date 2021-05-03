@@ -30,13 +30,8 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin):
                             status=HTTP_400_BAD_REQUEST)
 
         logger.info(request.data)
-        try:
-            user = self.queryset.get(phone_number=phone_number)
-            request.data['verified'] = False
-            serializer = self.get_serializer(instance=user, data=request.data, partial=True)
-        except User.DoesNotExist:
-            serializer = self.get_serializer(data=request.data)
 
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         otp = generate_otp()

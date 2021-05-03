@@ -32,11 +32,11 @@ class VerloopWhatsappApi:
         body = {
            "CampaignID": self.slots_campaign_id,
            "To": {
-               "PhoneNumber": 91 + phone_number
+               "PhoneNumber": "91" + phone_number
            },
            "Parameters": {
               "name": variables["name"],
-              "slots": variables["slots"],
+              "slots": str(variables["slots"]),
               "hospital_name": variables["hospital_name"],
               "district_name": variables["district_name"],
               "website_name": variables["website_name"],

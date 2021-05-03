@@ -25,5 +25,7 @@ class SlotChecker:
 
     def check(self, district_id, date):
         data = cowin_api.check_slots_by_district_and_date(district_id, date)
+        if not data:
+            return []
         free_slots = self.check_free_slots(data)
         return free_slots

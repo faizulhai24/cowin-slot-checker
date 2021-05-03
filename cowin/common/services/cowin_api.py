@@ -1,4 +1,7 @@
 import requests
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class CowinApi:
@@ -11,6 +14,7 @@ class CowinApi:
             self.URL_BASE + "/api/v2/appointment/sessions/public/calendarByDistrict?district_id={}&date={}".format(
                 district_id, date))
         if resp.status_code != 200:
+            logger.exception("Cowin API failed")
             return None
         return resp.json()
 
