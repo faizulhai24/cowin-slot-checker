@@ -10,7 +10,7 @@ from cowin.common.cache.redis import redis
 from cowin.common.helpers.otp_generator import generate_otp
 from .models import User
 from .serializers import UserSerializer
-from .tasks import add_district_ids
+from .tasks import add_district_ids_to_cache, add_user_to_district_cache
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +56,8 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin):
 
         instance = self.queryset.filter(phone_number=phone_number).get()
 
-        add_district_ids(instance.district_ids).delay()
+        add_district_ids_to_cache(instance.district_ids).delay()
+        add_user_to_district_cache(instance.id, instance.district_ids).delay()
 
         serializer = self.serializer_class(instance, data={'verified': True}, partial=True)
         serializer.is_valid()

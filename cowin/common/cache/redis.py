@@ -7,7 +7,6 @@ class RedisCache:
         self.client = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
 
     def set(self, key, value, ttl=180):
-        print("Setting cache", key, value)
         return self.client.set(key, value, ex=ttl)
 
     def get(self, key):
