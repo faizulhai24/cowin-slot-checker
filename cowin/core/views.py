@@ -1,10 +1,12 @@
 import logging
+import re
 
 from rest_framework.decorators import action
 from rest_framework.mixins import RetrieveModelMixin
 from rest_framework.response import Response
-from rest_framework.status import HTTP_201_CREATED, HTTP_404_NOT_FOUND, HTTP_401_UNAUTHORIZED, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND, HTTP_401_UNAUTHORIZED, HTTP_400_BAD_REQUEST
 from rest_framework.viewsets import GenericViewSet
+from django.http import Http404
 
 from cowin.common.cache.redis import redis
 from cowin.common.helpers.otp_generator import generate_otp
@@ -21,6 +23,15 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin):
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
+    def get_object(self):
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        self.kwargs.update({'phone_number': self.kwargs[lookup_url_kwarg]})
+        self.lookup_field = 'phone_number'
+
+        if not re.match(r'[6789]\d{9}$', self.kwargs[lookup_url_kwarg]):
+            raise ValueError("Invalid Phone number")
+        return super(UserViewSet, self).get_object()
+
     def create(self, request, *args, **kwargs):
         message_consent = request.data.get('message_consent')
         if not message_consent:
@@ -35,6 +46,16 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin):
         logger.info("Generated otp {}".format(otp))
         redis.set(request.data['phone_number'], otp, 300)
         return Response(serializer.data, status=HTTP_201_CREATED)
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+        except ValueError:
+            return Response({'message': 'Invalid Phone number'}, status=HTTP_400_BAD_REQUEST)
+        except Http404:
+            return Response({'message': 'Number does not exist'}, status=HTTP_404_NOT_FOUND)
+        return Response(status=HTTP_204_NO_CONTENT)
 
     @action(methods=['post'], url_path='otp/submit', detail=False)
     def otp_submit(self, request, **kwargs):

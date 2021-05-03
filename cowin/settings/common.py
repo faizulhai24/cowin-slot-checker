@@ -61,8 +61,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'cowin_db',
-        'USER': 'cowin',
-        'PASSWORD': 'q1w2e3r4',
+        'USER': '',
+        'PASSWORD': '',
         'HOST': '127.0.0.1',
         'PORT': '5432',
     }
@@ -141,3 +141,5 @@ LOGGING = {
         },
     },
 }
+
+SECRET_KEY = "dskjawfsl;fsfla's;f';s';flkdsjbhfkds,"
