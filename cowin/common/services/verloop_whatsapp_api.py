@@ -1,11 +1,12 @@
 import requests
+import os
 
 class VerloopWhatsappApi:
 
     def __init__(self):
         self.URL = "https://feedmyblr.verloop.io/api/v1/Campaign/SendMessage"
-        self.otp_campaign_id = "24390742-6948-4deb-abae-463aba2d33ac"
-        self.slots_campaign_id = "64c15104-f249-4c04-8f9d-ec6397a4ab84"
+        self.otp_campaign_id = os.getenv('OTP_CAMPAIGN_ID')
+        self.slots_campaign_id = os.getenv('SLOTS_CAMPAIGN_ID')
 
     def send_otp(self, phone_number, variables):
         body = {
