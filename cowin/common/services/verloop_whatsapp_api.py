@@ -4,12 +4,12 @@ class VerloopWhatsappApi:
 
     def __init__(self):
         self.URL = "https://feedmyblr.verloop.io/api/v1/Campaign/SendMessage"
-        self.otp_campaign_id = ""
-        self.slots_campaign_id = ""
+        self.otp_campaign_id = "24390742-6948-4deb-abae-463aba2d33ac"
+        self.slots_campaign_id = "64c15104-f249-4c04-8f9d-ec6397a4ab84"
 
     def send_otp(self, phone_number, variables):
         body = {
-            "CampaignID": self.OTPCampaignID,
+            "CampaignID": self.otp_campaign_id,
             "To": {
                 "PhoneNumber": phone_number
             },
@@ -24,7 +24,7 @@ class VerloopWhatsappApi:
 
     def send_slot_availability(self, phone_number, variables):
         body = {
-           "CampaignID": self.SlotsCampaignID,
+           "CampaignID": self.slots_campaign_id,
            "To": {
                "PhoneNumber": phone_number
            },
