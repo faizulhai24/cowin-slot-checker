@@ -13,9 +13,9 @@ class VerloopWhatsappApi:
             "To": {
                 "PhoneNumber": phone_number
             },
-            "Variables": {
+            "Parameters": {
                 "name": variables["name"],
-                "otp": variables["otp"]
+                "number": variables["number"]
             }
         }
         headers = {"Content-Type": "application/json"}
@@ -28,12 +28,12 @@ class VerloopWhatsappApi:
            "To": {
                "PhoneNumber": phone_number
            },
-           "Variables": {
+           "Parameters": {
               "name": variables["name"],
               "slots": variables["slots"],
-              "hospitals": variables["hospitals"],
-              "district": variables["district"],
-              "website" : variables["website"],
+              "hospital_name": variables["hospital_name"],
+              "district_name": variables["district_name"],
+              "website_name" : variables["website_name"],
            }
         }
         headers = {"Content-Type": "application/json"}
