@@ -23,12 +23,19 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin):
 
     def create(self, request, *args, **kwargs):
         message_consent = request.data.get('message_consent')
+        phone_number = request.data.get('phone_number')
         if not message_consent:
             return Response({'message': 'Message consent is required to register for notification.'},
                             status=HTTP_400_BAD_REQUEST)
 
         logger.info(request.data)
-        serializer = self.get_serializer(data=request.data)
+        try:
+            user = self.queryset.get(phone_number=phone_number)
+            request.data['verified'] = False
+            serializer = self.get_serializer(instance=user, data=request.data, partial=True)
+        except User.DoesNotExist:
+            serializer = self.get_serializer(data=request.data)
+
         serializer.is_valid(raise_exception=True)
         serializer.save()
         otp = generate_otp()
@@ -56,8 +63,8 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin):
 
         instance = self.queryset.filter(phone_number=phone_number).get()
 
-        add_district_ids_to_cache(instance.district_ids).delay()
-        add_user_to_district_cache(instance.id, instance.district_ids).delay()
+        add_district_ids_to_cache.delay(instance.district_ids)
+        add_user_to_district_cache.delay(instance.id, instance.district_ids)
 
         serializer = self.serializer_class(instance, data={'verified': True}, partial=True)
         serializer.is_valid()
