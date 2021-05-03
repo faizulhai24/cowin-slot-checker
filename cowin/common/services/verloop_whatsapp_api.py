@@ -7,7 +7,7 @@ class VerloopWhatsappApi:
         self.otp_campaign_id = ""
         self.slots_campaign_id = ""
 
-    def send_opt(self, phone_number, variables):
+    def send_otp(self, phone_number, variables):
         body = {
             "CampaignID": self.OTPCampaignID,
             "To": {
