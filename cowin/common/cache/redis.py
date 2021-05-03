@@ -1,9 +1,10 @@
 import redis
+from django.conf import settings
 
 
 class RedisCache:
     def __init__(self):
-        self.client = redis.Redis(host='localhost', port=6379, db=0)
+        self.client = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
 
     def set(self, key, value, ttl=180):
         print("Setting cache", key, value)
