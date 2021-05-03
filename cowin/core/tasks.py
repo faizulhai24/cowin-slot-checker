@@ -8,6 +8,8 @@ DISTRICT_IDS = ""
 
 @shared_task(name='core.tasks.check_slots')
 def check_slots(*args, **kwargs):
+    print("Check slots print")
+    logger.info("Check slots")
     pass
 
 
