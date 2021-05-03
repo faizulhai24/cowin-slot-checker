@@ -30,3 +30,4 @@ pids
 celerybeat-schedule
 
 local.py
+okteto-stack.yml
