@@ -47,7 +47,7 @@ def check_slots_non_priority(*args, **kwargs):
 
     for i, district_id in enumerate(district_ids):
         district_id = district_id.decode('utf-8')
-        check_slots_by_district.apply_asyc(district_id, dates, countdown=interval * i, expires=590)
+        check_slots_by_district.apply_async(args=(district_id, dates), countdown=interval * i, expires=590)
     return
 
 
@@ -66,7 +66,7 @@ def check_slots_priority(*args, **kwargs):
     interval = int(120/len(district_ids))
     for i, district_id in enumerate(district_ids):
         district_id = district_id.decode('utf-8')
-        check_slots_by_district.apply_async(district_id, dates, countdown=interval * i, expires=110)
+        check_slots_by_district.apply_async(args=(district_id, dates), countdown=interval * i, expires=110)
     return
 
 
