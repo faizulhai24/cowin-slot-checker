@@ -14,7 +14,7 @@ class CowinApi:
             self.URL_BASE + "/api/v2/appointment/sessions/public/calendarByDistrict?district_id={}&date={}".format(
                 district_id, date))
         if resp.status_code != 200:
-            logger.exception("Cowin API failed", resp.url, resp.status_code)
+            logger.exception("Cowin API failed, {}, {}".format(resp.url, resp.status_code))
             return None
         return resp.json()
 
