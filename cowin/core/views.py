@@ -12,7 +12,7 @@ from cowin.common.cache.redis import redis
 from cowin.common.helpers.otp_generator import generate_otp
 from .models import User
 from .serializers import UserSerializer
-from .tasks import add_district_ids_to_cache, add_user_to_district_cache
+from .tasks import add_district_ids_to_cache, add_user_to_district_cache, send_otp
 
 logger = logging.getLogger(__name__)
 
@@ -34,17 +34,26 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin):
 
     def create(self, request, *args, **kwargs):
         message_consent = request.data.get('message_consent')
+        phone_number = request.data.get('phone_number')
+        name = request.data.get('first_name')
         if not message_consent:
             return Response({'message': 'Message consent is required to register for notification.'},
                             status=HTTP_400_BAD_REQUEST)
 
         logger.info(request.data)
-        serializer = self.get_serializer(data=request.data)
+        try:
+            user = self.queryset.get(phone_number=phone_number)
+            request.data['verified'] = False
+            serializer = self.get_serializer(instance=user, data=request.data, partial=True)
+        except User.DoesNotExist:
+            serializer = self.get_serializer(data=request.data)
+
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
         otp = generate_otp()
-        logger.info("Generated otp {}".format(otp))
         redis.set(request.data['phone_number'], otp, 300)
+        send_otp.delay(phone_number, name, otp)
         return Response(serializer.data, status=HTTP_201_CREATED)
 
     def destroy(self, request, *args, **kwargs):
@@ -92,8 +101,8 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin):
 
         instance = self.queryset.filter(phone_number=phone_number).get()
 
-        add_district_ids_to_cache(instance.district_ids).delay()
-        add_user_to_district_cache(instance.id, instance.district_ids).delay()
+        add_district_ids_to_cache.delay(instance.district_ids)
+        add_user_to_district_cache.delay(instance.id, instance.district_ids)
 
         serializer = self.serializer_class(instance, data={'verified': True}, partial=True)
         serializer.is_valid()
