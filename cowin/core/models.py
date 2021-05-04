@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
@@ -12,7 +14,18 @@ class User(models.Model):
     verified = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
     message_consent = models.BooleanField(default=False)
+    last_notified_at = models.DateTimeField(null=True)
 
+    def can_notify_now(self):
+        if not self.last_notified_at:
+            return True
+        if (datetime.datetime.now() - datetime.timedelta(hours=12)) > self.last_notified_at:
+            return True
+        return False
+
+    def notified(self):
+        self.last_notified_at = datetime.datetime.now()
+        self.save()
 #
 # class District(models.Model):
 #     district_cowin_id = models.IntegerField(db_index=True)
