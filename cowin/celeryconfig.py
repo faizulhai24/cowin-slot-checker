@@ -11,7 +11,7 @@ beat_schedule = {
     },
     'poll_slots_priority': {
         'task': 'core.tasks.check_slots_priority',
-        'schedule': timedelta(minutes=2),
+        'schedule': timedelta(minutes=3),
     },
     'cache_refresh': {
         'task': 'core.tasks.repopulate_cache',

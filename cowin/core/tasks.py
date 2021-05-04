@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 DISTRICT_IDS_SET_KEY = 'district_ids'
 PRIORITY_DISTRICT_IDS_SET_KEY = 'priority_district_ids'
-NUM_WEEKS = 4
+NUM_WEEKS = 2
 
 
 @shared_task(name='core.tasks.add_user_to_district')

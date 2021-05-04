@@ -8,6 +8,8 @@ class CowinApi:
 
     def __init__(self):
         self.URL_BASE = "https://cdn-api.co-vin.in"
+        self.URL_BASE = "https://wise-cheetah-56.loca.lt"
+
 
     def check_slots_by_district_and_date(self, district_id, date):
         url = self.URL_BASE + "/api/v2/appointment/sessions/public/calendarByDistrict?district_id={}&date={}".format(district_id, date)
