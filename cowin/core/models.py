@@ -1,7 +1,6 @@
-import datetime
-
-from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from django.db import models
+from django.utils import timezone
 
 
 class User(models.Model):
@@ -16,15 +15,8 @@ class User(models.Model):
     message_consent = models.BooleanField(default=False)
     last_notified_at = models.DateTimeField(null=True)
 
-    def can_notify_now(self):
-        if not self.last_notified_at:
-            return True
-        if (datetime.datetime.now() - datetime.timedelta(hours=12)) > self.last_notified_at:
-            return True
-        return False
-
     def notified(self):
-        self.last_notified_at = datetime.datetime.now()
+        self.last_notified_at = timezone.localtime()
         self.save()
 #
 # class District(models.Model):

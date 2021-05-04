@@ -1,8 +1,9 @@
 import datetime
 import logging
-import time
+from datetime import timedelta
 
 from celery import shared_task
+from django.utils import timezone
 
 from cowin.common.cache.redis import redis
 from cowin.common.helpers.message_generator import get_message_params
@@ -63,7 +64,7 @@ def check_slots_priority(*args, **kwargs):
         target_time = now + datetime.timedelta(days=7 * i)
         dates.append(target_time.strftime("%d-%m-%Y"))
 
-    interval = int(120/len(district_ids))
+    interval = int(120 / len(district_ids))
     for i, district_id in enumerate(district_ids):
         district_id = district_id.decode('utf-8')
         check_slots_by_district.apply_async(args=(district_id, dates), countdown=interval * i, expires=110)
@@ -127,8 +128,12 @@ def send_message_for_district(district_id, free_slots):
 
 @shared_task(name='core.tasks.send_message_for_user')
 def send_message_for_user(user_id, params):
-    user = User.objects.get(pk=user_id)
-    if user.message_consent and user.can_notify_now() :
+    user_qs = User.objects.filter(pk=user_id, last_notified_at__lte=timezone.now() - timedelta(minutes=1))
+    if user_qs.exists():
+        user = user_qs.get()
+    else:
+        return
+    if user.message_consent:
         params['name'] = user.first_name
         logger.info("Sending availability message")
         verloop_whatsapp_api.send_slot_availability(user.phone_number, params)
