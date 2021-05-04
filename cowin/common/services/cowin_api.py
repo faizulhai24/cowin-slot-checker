@@ -15,6 +15,7 @@ class CowinApi:
                 district_id, date))
         if resp.status_code != 200:
             logger.exception("Cowin API failed")
+            logger.exception(resp.url, resp.status_code, resp.__dict__)
             return None
         return resp.json()
 
