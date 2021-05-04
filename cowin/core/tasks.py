@@ -101,7 +101,7 @@ def send_message_for_district(district_id, free_slots):
 @shared_task(name='core.tasks.send_message_for_user')
 def send_message_for_user(user_id, params):
     user = User.objects.get(pk=user_id)
-    if user.verified and user.message_consent:
+    if user.message_consent:
         params['name'] = user.first_name
         logger.info("Sending availability message")
         verloop_whatsapp_api.send_slot_availability(user.phone_number, params)

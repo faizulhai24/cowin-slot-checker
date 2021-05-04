@@ -7,7 +7,7 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class DistrictAdmin(admin.ModelAdmin):
-    list_display = ('updated_at', 'to_time', 'surge_price', 'surge_role', 'minimum_tickets', 'ended')
+    exclude = ['updated_at']
 
 
 admin.site.register(User, UserAdmin)
