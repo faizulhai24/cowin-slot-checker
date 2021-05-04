@@ -39,6 +39,7 @@ class UserViewSet(GenericViewSet, RetrieveModelMixin):
 
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
         otp = generate_otp()
         redis.set(request.data['phone_number'], otp, 300)
         send_otp.delay(phone_number, name, otp)
