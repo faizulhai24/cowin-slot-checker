@@ -74,7 +74,7 @@ def check_slots_priority(*args, **kwargs):
 def repopulate_cache(*args, **kwargs):
     logger.info("running repopulate_cache task")
     try:
-        users = User.objects.filter(verified=True, is_deleted=False).values('pk', 'district_ids')
+        users = User.objects.filter(is_deleted=False).values('pk', 'district_ids')
         districts = {}
         for user in users:
             for district_id in user.district_ids:
@@ -128,7 +128,8 @@ def send_message_for_district(district_id, free_slots):
 @shared_task(name='core.tasks.send_message_for_user')
 def send_message_for_user(user_id, params):
     user = User.objects.get(pk=user_id)
-    if user.message_consent:
+    if user.message_consent and user.can_notify_now() :
         params['name'] = user.first_name
         logger.info("Sending availability message")
         verloop_whatsapp_api.send_slot_availability(user.phone_number, params)
+        user.notified()
