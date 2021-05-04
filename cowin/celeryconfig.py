@@ -9,6 +9,10 @@ beat_schedule = {
         'task': 'core.tasks.check_slots',
         'schedule': timedelta(minutes=3),
     },
+    'cache_refresh':{
+        'task': 'core.tasks.repopulate_cache',
+        'schedule': timedelta(hours=2),
+    }
 }
 
 result_backend = 'redis://localhost:6379'

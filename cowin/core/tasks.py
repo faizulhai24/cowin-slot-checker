@@ -44,6 +44,25 @@ def check_slots(*args, **kwargs):
         check_slots_by_district.delay(district_id, dates)
     return
 
+@shared_task(name='core.tasks.repopulate_cache')
+def repopulate_cache(*args, **kwargs):
+    logger.info("running repopulate_cache task")
+    try:
+        users = User.objects.filter(verified=True, is_deleted=False).values('pk', 'district_ids')
+        districts = {}
+        for user in users:
+            for district_id in user.district_ids:
+                if district_id in districts:
+                    districts[district_id].append(user.pk)
+                else:
+                    districts[district_id] = [user.pk]
+
+        for district_id in districts:
+            key = 'district_id-{}'.format(district_id)
+            redis.add_to_set(key, *districts[district_id])
+    except Exception as e:
+        logger.error(e, exc_info=True)
+    return
 
 @shared_task(name='core.tasks.check_slots_by_district')
 def check_slots_by_district(district_id, dates):
