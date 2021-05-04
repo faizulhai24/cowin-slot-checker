@@ -48,7 +48,7 @@ def check_slots(*args, **kwargs):
 def repopulate_cache(*args, **kwargs):
     logger.info("running repopulate_cache task")
     try:
-        users= User.objects.filter(verified=True, is_deleted=False)
+        users = User.objects.filter(verified=True, is_deleted=False).values('pk', 'district_ids')
         districts = {}
         for user in users:
             for district_id in user.district_ids:
