@@ -41,17 +41,21 @@ def check_slots(*args, **kwargs):
 
     for district_id in district_ids:
         district_id = district_id.decode('utf-8')
-        free_slots = []
-        for date in dates:
-            sc = SlotChecker()
-            slots = sc.check(district_id, date)
-            free_slots.extend(slots)
-
-        if free_slots:
-            send_message_for_district.delay(district_id, free_slots)
-        else:
-            logger.info('No slots found')
+        check_slots_by_district.delay(district_id, dates)
     return
+
+
+@shared_task(name='core.tasks.check_slots_by_district')
+def check_slots_by_district(district_id, dates):
+    free_slots = []
+    sc = SlotChecker()
+    for date in dates:
+        slots = sc.check(district_id, date)
+        free_slots.extend(slots)
+    if free_slots:
+        send_message_for_district.delay(district_id, free_slots)
+    else:
+        logger.info('No slots found')
 
 
 @shared_task(name='core.tasks.send_otp')
