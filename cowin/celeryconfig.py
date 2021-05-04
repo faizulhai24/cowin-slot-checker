@@ -5,11 +5,15 @@ from django.conf import settings
 broker_url = settings.BROKER_URL
 
 beat_schedule = {
-    'poll_slots': {
-        'task': 'core.tasks.check_slots',
-        'schedule': timedelta(minutes=3),
+    'poll_slots_non_priority': {
+        'task': 'core.tasks.check_slots_non_priority',
+        'schedule': timedelta(minutes=10),
     },
-    'cache_refresh':{
+    'poll_slots_priority': {
+        'task': 'core.tasks.check_slots_priority',
+        'schedule': timedelta(minutes=2),
+    },
+    'cache_refresh': {
         'task': 'core.tasks.repopulate_cache',
         'schedule': timedelta(hours=2),
     }

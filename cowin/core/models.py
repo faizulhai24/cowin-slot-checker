@@ -13,3 +13,11 @@ class User(models.Model):
     is_deleted = models.BooleanField(default=False)
     message_consent = models.BooleanField(default=False)
 
+#
+# class District(models.Model):
+#     district_cowin_id = models.IntegerField(db_index=True)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+#     last_synced_at = models.DateTimeField(db_index=True)
+#     is_active = models.BooleanField(default=False)
+#     high_priority = models.BooleanField(default=False)

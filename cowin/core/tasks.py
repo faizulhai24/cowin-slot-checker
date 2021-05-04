@@ -13,6 +13,7 @@ from .models import User
 logger = logging.getLogger(__name__)
 
 DISTRICT_IDS_SET_KEY = 'district_ids'
+PRIORITY_DISTRICT_IDS_SET_KEY = 'priority_district_ids'
 NUM_WEEKS = 4
 
 
@@ -28,9 +29,14 @@ def add_district_ids_to_cache(district_ids):
     return redis.add_to_set(DISTRICT_IDS_SET_KEY, *district_ids)
 
 
-@shared_task(name='core.tasks.check_slots')
-def check_slots(*args, **kwargs):
-    district_ids = list(redis.get_members_from_set(DISTRICT_IDS_SET_KEY))
+@shared_task(name='core.tasks.check_slots_non_priority')
+def check_slots_non_priority(*args, **kwargs):
+    all_district_ids = redis.get_members_from_set(DISTRICT_IDS_SET_KEY)
+    priority_district_ids = redis.get_members_from_set(PRIORITY_DISTRICT_IDS_SET_KEY)
+
+    district_ids = list(all_district_ids - priority_district_ids)
+    interval = int(600 / len(district_ids))
+
     if not district_ids:
         return
     now = datetime.datetime.now()
@@ -39,10 +45,30 @@ def check_slots(*args, **kwargs):
         target_time = now + datetime.timedelta(days=7 * i)
         dates.append(target_time.strftime("%d-%m-%Y"))
 
-    for district_id in district_ids:
+    for i, district_id in enumerate(district_ids):
         district_id = district_id.decode('utf-8')
-        check_slots_by_district.delay(district_id, dates)
+        check_slots_by_district.apply_asyc(district_id, dates, countdown=interval * i, expires=590)
     return
+
+
+@shared_task(name='core.tasks.check_slots_priority')
+def check_slots_priority(*args, **kwargs):
+    district_ids = list(redis.get_members_from_set(PRIORITY_DISTRICT_IDS_SET_KEY))
+    if not district_ids:
+        return
+    now = datetime.datetime.now()
+    dates = []
+
+    for i in range(NUM_WEEKS):
+        target_time = now + datetime.timedelta(days=7 * i)
+        dates.append(target_time.strftime("%d-%m-%Y"))
+
+    interval = int(120/len(district_ids))
+    for i, district_id in enumerate(district_ids):
+        district_id = district_id.decode('utf-8')
+        check_slots_by_district.apply_async(district_id, dates, countdown=interval * i, expires=110)
+    return
+
 
 @shared_task(name='core.tasks.repopulate_cache')
 def repopulate_cache(*args, **kwargs):
@@ -63,6 +89,7 @@ def repopulate_cache(*args, **kwargs):
     except Exception as e:
         logger.error(e, exc_info=True)
     return
+
 
 @shared_task(name='core.tasks.check_slots_by_district')
 def check_slots_by_district(district_id, dates):
