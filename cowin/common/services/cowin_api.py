@@ -16,6 +16,8 @@ class CowinApi:
         if resp.status_code != 200:
             logger.exception("Cowin API failed, {}, {}".format(resp.url, resp.status_code))
             return None
+        else:
+            logger.info("Cowin API success, {}, {}".format(resp.url, resp.status_code))
         return resp.json()
 
 
