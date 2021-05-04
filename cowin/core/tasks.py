@@ -44,9 +44,9 @@ def check_slots(*args, **kwargs):
         free_slots = []
         for date in dates:
             sc = SlotChecker()
-            time.sleep(100)
             slots = sc.check(district_id, date)
             free_slots.extend(slots)
+
         if free_slots:
             send_message_for_district.delay(district_id, free_slots)
         else:
