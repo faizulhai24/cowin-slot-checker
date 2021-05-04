@@ -7,11 +7,11 @@ broker_url = settings.BROKER_URL
 beat_schedule = {
     'poll_slots_non_priority': {
         'task': 'core.tasks.check_slots_non_priority',
-        'schedule': timedelta(minutes=30),
+        'schedule': timedelta(minutes=10),
     },
     'poll_slots_priority': {
         'task': 'core.tasks.check_slots_priority',
-        'schedule': timedelta(minutes=15),
+        'schedule': timedelta(minutes=2),
     },
     'cache_refresh': {
         'task': 'core.tasks.repopulate_cache',
