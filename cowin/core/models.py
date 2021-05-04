@@ -1,5 +1,4 @@
 import datetime
-import pytz
 
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
@@ -20,12 +19,12 @@ class User(models.Model):
     def can_notify_now(self):
         if not self.last_notified_at:
             return True
-        if (datetime.datetime.now(pytz.UTC) - datetime.timedelta(hours=12)) > self.last_notified_at:
+        if (datetime.datetime.now() - datetime.timedelta(hours=12)) > self.last_notified_at:
             return True
         return False
 
     def notified(self):
-        self.last_notified_at = datetime.datetime.now(pytz.UTC)
+        self.last_notified_at = datetime.datetime.now()
         self.save()
 #
 # class District(models.Model):
