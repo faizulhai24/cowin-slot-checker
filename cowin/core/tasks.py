@@ -128,7 +128,7 @@ def send_message_for_district(district_id, free_slots):
 
 @shared_task(name='core.tasks.send_message_for_user')
 def send_message_for_user(user_id, params):
-    user_qs = User.objects.filter(pk=user_id, last_notified_at__lte=timezone.now() - timedelta(minutes=1))
+    user_qs = User.objects.filter(pk=user_id, last_notified_at__lte=timezone.now() - timedelta(hours=6))
     if user_qs.exists():
         user = user_qs.get()
     else:
